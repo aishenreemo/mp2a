@@ -1,0 +1,5 @@
+-lavformat
+-lavcodec
+-lSDL2
+-lz
+-lm
