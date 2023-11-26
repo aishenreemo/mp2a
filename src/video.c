@@ -26,7 +26,9 @@ enum mp2a_result_t find_video_stream() {
 
 			video_codec_params = stream->codecpar;
 			video_codec = (AVCodec *) avcodec_find_decoder(video_codec_params->codec_id);
+			FAIL_IF_NULL(video_codec);
 			video_codec_ctx = avcodec_alloc_context3(video_codec);
+			FAIL_IF_NULL(video_codec_ctx);
 
 			return MP2A_SUCCESS;
 		}
