@@ -23,10 +23,7 @@ enum mp2a_result_t get_window_size() {
 
 
 enum mp2a_result_t display_frame() {
-	EXIT_IF_TRUE(
-		video_codec_params == NULL,
-		"error(screen): AVCodecParameters is NULL"
-	);
+	FAIL_IF_NULL(video_codec_params);
 
 	printf(MOVE_CURSOR(0, 0));
 

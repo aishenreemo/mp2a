@@ -10,27 +10,34 @@
 
 #define FILE_INPUT "bad_apple.mp4"
 
-#define EXIT_IF_FAILURE(STATEMENT, MESSAGE, ...) do {\
-		if (STATEMENT != MP2A_SUCCESS) {\
-			fprintf(stderr, #MESSAGE, ##__VA_ARGS__);\
-			exit(MP2A_FAILURE);\
-		}\
-	} while (false)
-
-#define EXIT_IF_TRUE(EXPRESSION, MESSAGE, ...) do {\
+#define GOTO_IF_TRUE(LABEL, EXPRESSION, MESSAGE, ...) do {\
 		if (EXPRESSION) {\
 			fprintf(stderr, #MESSAGE, ##__VA_ARGS__);\
-			exit(MP2A_FAILURE);\
+			goto LABEL;\
 		}\
 	} while (false)
 
-#define EXIT_IF_ALLOC_NULL(IDENTIFIER, ALLOC_STATEMENT) do {\
+#define GOTO_IF_FAILURE(LABEL, STATEMENT, MESSAGE, ...) \
+	GOTO_IF_TRUE(LABEL, STATEMENT != MP2A_SUCCESS, #MESSAGE, ##__VA_ARGS__);
+
+#define GOTO_IF_ALLOC_NULL(LABEL, IDENTIFIER, ALLOC_STATEMENT) do {\
 		IDENTIFIER = ALLOC_STATEMENT;\
-		if (IDENTIFIER == NULL) {\
-			fprintf(stderr, "error: couldn't alloc memory for " #IDENTIFIER ".\n");\
-			exit(MP2A_FAILURE);\
+		GOTO_IF_TRUE(\
+			LABEL,\
+			IDENTIFIER == NULL,\
+			"error: couldn't alloc memory for " #IDENTIFIER ".\n"\
+		);\
+	} while (false)
+
+#define FAIL_IF_TRUE(EXPRESSION, MESSAGE, ...) do {\
+		if (EXPRESSION) {\
+			fprintf(stderr, #MESSAGE, ##__VA_ARGS__);\
+			return MP2A_FAILURE;\
 		}\
 	} while (false)
+
+#define FAIL_IF_FAILURE(STATEMENT, MESSAGE, ...) FAIL_IF_TRUE(STATEMENT != MP2A_SUCCESS, #MESSAGE, ##__VA_ARGS__);
+#define FAIL_IF_NULL(IDENTIFIER) FAIL_IF_TRUE(IDENTIFIER == NULL, "error: " #IDENTIFIER " is NULL.\n");
 
 
 enum mp2a_result_t {

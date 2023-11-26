@@ -13,7 +13,7 @@ AVCodec *video_codec;
 
 
 enum mp2a_result_t find_video_stream() {
-	EXIT_IF_TRUE(
+	FAIL_IF_TRUE(
 		format_ctx == NULL,
 		"error(video): AVFormatContext is NULL\n"
 	);
@@ -37,21 +37,12 @@ enum mp2a_result_t find_video_stream() {
 
 
 enum mp2a_result_t decode_video_packet() {
-	EXIT_IF_TRUE(
-		video_codec_ctx == NULL,
-		"error(video): AVCodecContext is NULL\n"
-	);
-	EXIT_IF_TRUE(
-		packet == NULL,
-		"error(video): AVPacket is NULL\n"
-	);
-	EXIT_IF_TRUE(
-		frame == NULL,
-		"error(video): AVFrame is NULL\n"
-	);
+	FAIL_IF_NULL(video_codec_ctx);
+	FAIL_IF_NULL(packet);
+	FAIL_IF_NULL(frame);
 
-	EXIT_IF_TRUE(
-		avcodec_send_packet(video_codec_ctx, packet),
+	FAIL_IF_TRUE(
+		avcodec_send_packet(video_codec_ctx, packet) < 0,
 		"error: could not send packet to video codec\n"
 	);
 
@@ -62,7 +53,7 @@ enum mp2a_result_t decode_video_packet() {
 			break;
 		}
 
-		EXIT_IF_TRUE(result < 0, "error: could not receive video frame from codec\n");
+		FAIL_IF_TRUE(result < 0, "error: could not receive video frame from codec\n");
 
 		display_frame();
 		usleep(1000000 / 30);
