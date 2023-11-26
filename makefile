@@ -1,20 +1,33 @@
 CC := gcc
 
-FLAGS := -Wall -O3 -march=native
+SOURCE := ./src
+DIST := ./dist
+INCLUDE := ./include
+
+FLAGS := -Wall -O3 -march=native -I$(INCLUDE)
 LIBS := -lavformat -lavcodec -lavutil
 
-all: mp2a
+OBJECTS := $(DIST)/main.o $(DIST)/video.o $(DIST)/audio.o $(DIST)/screen.o
+TARGET := mp2a
 
-mp2a: main.c
+all: $(DIST) $(OBJECTS) $(TARGET)
+
+$(DIST):
+	mkdir -p $@
+
+$(DIST)/%.o: $(SOURCE)/%.c $(INCLUDE)/%.h
+	$(CC) -c -o $@ $< $(FLAGS) $(LIBS)
+
+$(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(FLAGS) $(LIBS)
 
 install:
-	cp main ~/.local/bin
+	cp $(TARGET) ~/.local/bin
 
 uninstall:
-	rm ~/.local/bin/mp2a
+	rm ~/.local/bin/$(TARGET)
 
 clean:
-	rm -rf *~ mp2a
+	rm -rf *~ $(TARGET) $(DIST)
 
 .PHONY: format clean install uninstall

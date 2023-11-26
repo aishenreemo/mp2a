@@ -3,3 +3,4 @@
 -lSDL2
 -lz
 -lm
+-I./include
