@@ -5,7 +5,7 @@ DIST := ./dist
 INCLUDE := ./include
 
 FLAGS := -Wall -O3 -march=native -I$(INCLUDE)
-LIBS := -lavformat -lavcodec -lavutil
+LIBS := -lavformat -lavcodec -lavutil -lSDL2 -lswresample
 
 OBJECTS := $(DIST)/main.o $(DIST)/video.o $(DIST)/audio.o $(DIST)/screen.o
 TARGET := mp2a

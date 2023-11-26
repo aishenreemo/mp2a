@@ -1,14 +1,17 @@
 #include "screen.h"
+#include "audio.h"
 #include "video.h"
-#include <libavcodec/avcodec.h>
-#include <libavcodec/packet.h>
-#include <libavformat/avformat.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_audio.h>
 #include "main.h"
 
 
 AVFormatContext *format_ctx;
 AVPacket *packet;
 AVFrame *frame;
+
+SDL_Event event;
+bool quit;
 
 
 int main() {
@@ -26,7 +29,6 @@ int main() {
 		"error: couldn't open file %s.\n",
 		FILE_INPUT
 	);
-
 	GOTO_IF_TRUE(
 		dealloc_l,
 		avformat_find_stream_info(format_ctx, NULL) < 0,
@@ -40,18 +42,46 @@ int main() {
 		"error: file %s doesn't contain a video stream.\n",
 		FILE_INPUT
 	);
-
 	GOTO_IF_TRUE(
 		dealloc_l,
 		avcodec_parameters_to_context(video_codec_ctx, video_codec_params) < 0,
 		"error: failed parameters to context.\n"
 	);
-
 	GOTO_IF_TRUE(
 		dealloc_l,
 		avcodec_open2(video_codec_ctx, video_codec, NULL) < 0,
 		"error: failed to initialize AVCodecContext.\n"
 	);
+
+	GOTO_IF_FAILURE(
+		dealloc_l,
+		find_audio_stream(),
+		"error: file %s doesn't contain a video stream.\n",
+		FILE_INPUT
+	);
+	GOTO_IF_TRUE(
+		dealloc_l,
+		avcodec_parameters_to_context(audio_codec_ctx, audio_codec_params) < 0,
+		"error: failed parameters to context.\n"
+	);
+	GOTO_IF_TRUE(
+		dealloc_l,
+		avcodec_open2(audio_codec_ctx, audio_codec, NULL) < 0,
+		"error: failed to initialize AVCodecContext.\n"
+	);
+
+	GOTO_IF_TRUE(
+		dealloc_l,
+		SDL_Init(SDL_INIT_AUDIO) < 0,
+		"error: could not initialize SDL audio subsystem.\n"
+	);
+
+	GOTO_IF_FAILURE(dealloc_l, init_audio_spec(), "error: failed to initialize audio spec\n");
+
+	audio_device = SDL_OpenAudioDevice(NULL, 0, &wanted_spec, NULL, 0);
+	GOTO_IF_TRUE(dealloc_l, audio_device == 0, "error: couldn't open audio device.\n");
+
+	SDL_PauseAudioDevice(audio_device, 0);
 
 	printf(CLEAR_TERMINAL);
 	printf(MOVE_CURSOR(0, 0));
@@ -60,21 +90,44 @@ int main() {
 	GOTO_IF_ALLOC_NULL(dealloc_l, packet, av_packet_alloc());
 
 	while (av_read_frame(format_ctx, packet) >= 0) {
-		if (packet->stream_index == video_stream_index) {
-			GOTO_IF_FAILURE(dealloc_l, decode_video_packet(), "error: failed to decode video.\n");
+		while (SDL_PollEvent(&event) != 0) {
+			if (event.type == SDL_QUIT) {
+				quit = true;
+			}
 		}
 
-		av_packet_unref(packet);
+		if (packet->stream_index == video_stream_index) {
+			GOTO_IF_FAILURE(
+				dealloc_l,
+				decode_video_packet(),
+				"error: failed to decode video.\n"
+			);
+		} else if (packet->stream_index == audio_stream_index) {
+			GOTO_IF_FAILURE(
+				dealloc_l,
+				decode_audio_packet(),
+				"error: failed to decode audio.\n"
+			);
+		} else {
+			av_packet_unref(packet);
+		}
+
+		GOTO_IF_TRUE(dealloc_l, quit, "exiting...\n");
 	}
 
 	dealloc_l: {
 		av_frame_free(&frame);
 		av_packet_free(&packet);
+		avcodec_parameters_free(&audio_codec_params);
+		avcodec_close(audio_codec_ctx);
+		avcodec_free_context(&audio_codec_ctx);
 		avcodec_parameters_free(&video_codec_params);
 		avcodec_close(video_codec_ctx);
 		avcodec_free_context(&video_codec_ctx);
 		avformat_close_input(&format_ctx);
 		avformat_free_context(format_ctx);
+		SDL_CloseAudioDevice(audio_device);
+		SDL_Quit();
 	}
 
 	return MP2A_SUCCESS;

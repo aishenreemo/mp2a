@@ -1,9 +1,11 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <SDL2/SDL.h>
 
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+
 #include <sys/ioctl.h>
 #include <stdbool.h>
 
@@ -41,14 +43,17 @@
 
 
 enum mp2a_result_t {
-	MP2A_SUCCESS,
-	MP2A_FAILURE,
+	MP2A_SUCCESS = 0,
+	MP2A_FAILURE = -1,
 };
 
 
 extern AVFormatContext *format_ctx;
 extern AVPacket *packet;
 extern AVFrame *frame;
+
+extern SDL_Event event;
+extern bool quit;
 
 
 #endif // !MAIN_H
