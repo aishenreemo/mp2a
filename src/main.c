@@ -1,8 +1,6 @@
 #include "screen.h"
 #include "audio.h"
 #include "video.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_audio.h>
 #include "main.h"
 
 
@@ -78,7 +76,7 @@ int main() {
 
 	GOTO_IF_FAILURE(dealloc_l, init_audio_spec(), "error: failed to initialize audio spec\n");
 
-	audio_device = SDL_OpenAudioDevice(NULL, 0, &wanted_spec, NULL, 0);
+	audio_device = SDL_OpenAudioDevice(NULL, 0, &wanted_spec, &obtained_spec, 0);
 	GOTO_IF_TRUE(dealloc_l, audio_device == 0, "error: couldn't open audio device.\n");
 
 	SDL_PauseAudioDevice(audio_device, 0);
@@ -88,8 +86,19 @@ int main() {
 
 	GOTO_IF_ALLOC_NULL(dealloc_l, frame, av_frame_alloc());
 	GOTO_IF_ALLOC_NULL(dealloc_l, packet, av_packet_alloc());
+	GOTO_IF_ALLOC_NULL(dealloc_l, audio_swr_ctx, swr_alloc());
 
-	while (av_read_frame(format_ctx, packet) >= 0) {
+	av_opt_set_int(audio_swr_ctx, "in_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+	av_opt_set_int(audio_swr_ctx, "in_sample_rate", audio_codec_ctx->sample_rate, 0);
+	av_opt_set_sample_fmt(audio_swr_ctx, "in_sample_fmt", audio_codec_ctx->sample_fmt, 0);
+
+	av_opt_set_int(audio_swr_ctx, "out_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+	av_opt_set_int(audio_swr_ctx, "out_sample_rate", audio_codec_ctx->sample_rate, 0);
+	av_opt_set_sample_fmt(audio_swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+	swr_init(audio_swr_ctx);
+
+
+	while (av_read_frame(format_ctx, packet) >= 0 || !quit) {
 		while (SDL_PollEvent(&event) != 0) {
 			if (event.type == SDL_QUIT) {
 				quit = true;
@@ -116,6 +125,7 @@ int main() {
 	}
 
 	dealloc_l: {
+		swr_free(&audio_swr_ctx);
 		av_frame_free(&frame);
 		av_packet_free(&packet);
 		avcodec_parameters_free(&audio_codec_params);
