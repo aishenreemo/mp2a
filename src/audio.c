@@ -2,7 +2,6 @@
 #include "audio.h"
 #include "main.h"
 
-
 int audio_stream_index;
 
 AVCodecParameters *audio_codec_params;

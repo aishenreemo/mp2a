@@ -1,10 +1,10 @@
 #include "screen.h"
 #include "audio.h"
 #include "video.h"
-#include <stdint.h>
-#include <stdio.h>
 #include "main.h"
 
+
+struct mp2a_options_t options;
 
 AVFormatContext *format_ctx;
 AVPacket *packet;
@@ -14,14 +14,21 @@ SDL_Event event;
 bool quit;
 
 
-int main(int argc, char *argv[]) {
-	GOTO_IF_TRUE(
-		dealloc_l,
-		argc < 2,
-		"usage: %s <input_file>\n",
-		argv[0]
+static void help() {
+	printf(
+		"MPEG-4 to ASCII video player"
+		"usage: \e[1;31mbfcli\e[0m [FILE] [--help] [--version]\n\n"
+		"\e[1;37m\t-v\t--version\e[0m:\tPrint version and exit.\n"
+		"\e[1;37m\t-h\t   --help\e[0m:\tShow this message.\n\n"
+		"\e[1;37m\t\t   --colors\e[0m:\tEnable ANSI colors.\n\n"
+		"\e[1;37m\t\t   --invert\e[0m:\tInvert output.\n\n"
+		"Homepage: <https://github.com/aishenreemo/mp2a>\n"
+		"(C) 2023 Aishen Reemo <aish3n@pm.me>\n\n"
 	);
+}
 
+
+int main(int argc, char *args[]) {
 	GOTO_IF_TRUE(
 		dealloc_l,
 		get_window_size(),
@@ -30,24 +37,48 @@ int main(int argc, char *argv[]) {
 
 	GOTO_IF_ALLOC_NULL(dealloc_l, format_ctx, avformat_alloc_context());
 
-	GOTO_IF_FAILURE(
+	for (int i = 1; i < argc; i++) {
+		if (EQ(args[i], "--help") || EQ(args[i], "-h")) {
+			help();
+			goto dealloc_l;
+		} else if (EQ(args[i], "--version") || EQ(args[i], "-v")) {
+			printf(VERSION "\n");
+			goto dealloc_l;
+		} else if (EQ(args[i], "--colors")) {
+			options.is_color = true;
+			continue;
+		} else if (EQ(args[i], "--invert")) {
+			options.is_invert = true;
+			continue;
+		}
+
+		options.input_file = args[i];
+		GOTO_IF_FAILURE(
+			dealloc_l,
+			avformat_open_input(&format_ctx, options.input_file, NULL, NULL),
+			"error: couldn't open file %s.\n",
+			options.input_file
+		);
+	}
+
+	GOTO_IF_TRUE(
 		dealloc_l,
-		avformat_open_input(&format_ctx, argv[1], NULL, NULL),
-		"error: couldn't open file %s.\n",
-		argv[1]
+		options.input_file == NULL,
+		"error: no file specified.\n"
 	);
+
 	GOTO_IF_TRUE(
 		dealloc_l,
 		avformat_find_stream_info(format_ctx, NULL) < 0,
 		"error: couldn't find stream info in file %s.\n",
-		argv[1]
+		options.input_file
 	);
 
 	GOTO_IF_FAILURE(
 		dealloc_l,
 		find_video_stream(),
 		"error: file %s doesn't contain a video stream.\n",
-		argv[1]
+		options.input_file
 	);
 	GOTO_IF_TRUE(
 		dealloc_l,
@@ -64,7 +95,7 @@ int main(int argc, char *argv[]) {
 		dealloc_l,
 		find_audio_stream(),
 		"error: file %s doesn't contain a video stream.\n",
-		argv[1]
+		options.input_file
 	);
 	GOTO_IF_TRUE(
 		dealloc_l,

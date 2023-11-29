@@ -44,6 +44,10 @@ enum mp2a_result_t display_frame() {
 
 			char ascii_char = get_char_by_intensity(intensity);
 
+			if (options.is_color) {
+				printf(SET_COLOR(r, g, b));
+			}
+
 			putchar(ascii_char);
 		}
 
@@ -60,7 +64,17 @@ char get_char_by_intensity(float intensity) {
 	int num_chars = sizeof(ASCII_CHARS) - 1;
 
 	int index = (int)(intensity * num_chars);
-	index = (index < 0) ? 0 : (index >= num_chars) ? num_chars - 1 : index;
+
+	if (index < 0) {
+		index = 0;
+	} else if (index >= num_chars) {
+		index = num_chars - 1;
+	}
+
+	if (options.is_invert) {
+		index += 1;
+		index = num_chars - index;
+	}
 
 	return ASCII_CHARS[index];
 }

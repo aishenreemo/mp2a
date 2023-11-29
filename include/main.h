@@ -8,7 +8,11 @@
 
 #include <sys/ioctl.h>
 #include <stdbool.h>
+#include <string.h>
 
+
+#define VERSION "mp2a v0.1"
+#define EQ(STRING_A, STRING_B) strcmp(STRING_A, STRING_B) == 0
 
 #define GOTO_IF_TRUE(LABEL, EXPRESSION, MESSAGE, ...) do {\
 		if (EXPRESSION) {\
@@ -45,6 +49,14 @@ enum mp2a_result_t {
 	MP2A_FAILURE = -1,
 };
 
+struct mp2a_options_t {
+	char *input_file;
+	bool is_invert;
+	bool is_color;
+};
+
+
+extern struct mp2a_options_t options;
 
 extern AVFormatContext *format_ctx;
 extern AVPacket *packet;
@@ -52,6 +64,5 @@ extern AVFrame *frame;
 
 extern SDL_Event event;
 extern bool quit;
-
 
 #endif // !MAIN_H
