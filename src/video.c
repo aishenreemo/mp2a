@@ -58,7 +58,6 @@ enum mp2a_result_t decode_video_packet() {
 		FAIL_IF_TRUE(result < 0, "error: could not receive video frame from codec\n");
 
 		display_frame();
-		SDL_Delay(1000 / av_q2d(format_ctx->streams[video_stream_index]->avg_frame_rate));
 	}
 
 	return MP2A_SUCCESS;

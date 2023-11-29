@@ -1,6 +1,8 @@
 #include "screen.h"
 #include "audio.h"
 #include "video.h"
+#include <stdint.h>
+#include <stdio.h>
 #include "main.h"
 
 
@@ -105,7 +107,10 @@ int main(int argc, char *argv[]) {
 	swr_init(audio_swr_ctx);
 
 
-	while (av_read_frame(format_ctx, packet) >= 0 || !quit) {
+	float time_base = av_q2d(format_ctx->streams[video_stream_index]->time_base);
+	int64_t video_pts = AV_NOPTS_VALUE;
+
+	while (av_read_frame(format_ctx, packet) >= 0) {
 		while (SDL_PollEvent(&event) != 0) {
 			if (event.type == SDL_QUIT) {
 				quit = true;
@@ -118,6 +123,7 @@ int main(int argc, char *argv[]) {
 				decode_video_packet(),
 				"error: failed to decode video.\n"
 			);
+			video_pts = packet->pts;
 		} else if (packet->stream_index == audio_stream_index) {
 			GOTO_IF_FAILURE(
 				dealloc_l,
@@ -126,6 +132,13 @@ int main(int argc, char *argv[]) {
 			);
 		} else {
 			av_packet_unref(packet);
+		}
+
+		int64_t video_duration = video_pts * time_base * 1000;
+		int64_t diff = video_duration - SDL_GetTicks();
+
+		if (diff > 0) {
+			SDL_Delay(diff);
 		}
 
 		GOTO_IF_TRUE(dealloc_l, quit, "exiting...\n");

@@ -1,7 +1,3 @@
-#include <libswresample/swresample.h>
-#include <SDL2/SDL_audio.h>
-#include <unistd.h>
-
 #include "screen.h"
 #include "audio.h"
 #include "main.h"
