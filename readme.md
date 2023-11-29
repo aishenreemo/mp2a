@@ -23,3 +23,6 @@ Options:
   --colors:         Enable ANSI colors.
   --invert:         Invert output.
 ```
+
+## example
+[![asciicast](https://asciinema.org/a/bXybmYwK7UMkBsSmXOnnPa4hQ.png)](https://asciinema.org/a/bXybmYwK7UMkBsSmXOnnPa4hQ)
