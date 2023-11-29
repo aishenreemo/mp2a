@@ -1,3 +1,4 @@
+-lswresample
 -lavformat
 -lavcodec
 -lSDL2

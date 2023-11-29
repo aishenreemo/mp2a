@@ -16,12 +16,12 @@ bool quit;
 
 static void help() {
 	printf(
-		"MPEG-4 to ASCII video player"
-		"usage: \e[1;31mbfcli\e[0m [FILE] [--help] [--version]\n\n"
+		"MPEG-4 to ASCII video player\n"
+		"usage: \e[1;31mmp2a\e[0m [FILE] [--help] [--version]\n\n"
 		"\e[1;37m\t-v\t--version\e[0m:\tPrint version and exit.\n"
 		"\e[1;37m\t-h\t   --help\e[0m:\tShow this message.\n\n"
-		"\e[1;37m\t\t   --colors\e[0m:\tEnable ANSI colors.\n\n"
-		"\e[1;37m\t\t   --invert\e[0m:\tInvert output.\n\n"
+		"\e[1;37m\t  \t --colors\e[0m:\tEnable ANSI colors.\n"
+		"\e[1;37m\t  \t --invert\e[0m:\tInvert output.\n\n"
 		"Homepage: <https://github.com/aishenreemo/mp2a>\n"
 		"(C) 2023 Aishen Reemo <aish3n@pm.me>\n\n"
 	);
