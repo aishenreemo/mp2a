@@ -12,7 +12,14 @@ SDL_Event event;
 bool quit;
 
 
-int main() {
+int main(int argc, char *argv[]) {
+	GOTO_IF_TRUE(
+		dealloc_l,
+		argc < 2,
+		"usage: %s <input_file>\n",
+		argv[0]
+	);
+
 	GOTO_IF_TRUE(
 		dealloc_l,
 		get_window_size(),
@@ -23,22 +30,22 @@ int main() {
 
 	GOTO_IF_FAILURE(
 		dealloc_l,
-		avformat_open_input(&format_ctx, FILE_INPUT, NULL, NULL),
+		avformat_open_input(&format_ctx, argv[1], NULL, NULL),
 		"error: couldn't open file %s.\n",
-		FILE_INPUT
+		argv[1]
 	);
 	GOTO_IF_TRUE(
 		dealloc_l,
 		avformat_find_stream_info(format_ctx, NULL) < 0,
 		"error: couldn't find stream info in file %s.\n",
-		FILE_INPUT
+		argv[1]
 	);
 
 	GOTO_IF_FAILURE(
 		dealloc_l,
 		find_video_stream(),
 		"error: file %s doesn't contain a video stream.\n",
-		FILE_INPUT
+		argv[1]
 	);
 	GOTO_IF_TRUE(
 		dealloc_l,
@@ -55,7 +62,7 @@ int main() {
 		dealloc_l,
 		find_audio_stream(),
 		"error: file %s doesn't contain a video stream.\n",
-		FILE_INPUT
+		argv[1]
 	);
 	GOTO_IF_TRUE(
 		dealloc_l,

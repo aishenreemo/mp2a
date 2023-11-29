@@ -10,8 +10,6 @@
 #include <stdbool.h>
 
 
-#define FILE_INPUT "bad_apple.mp4"
-
 #define GOTO_IF_TRUE(LABEL, EXPRESSION, MESSAGE, ...) do {\
 		if (EXPRESSION) {\
 			fprintf(stderr, MESSAGE, ##__VA_ARGS__);\
