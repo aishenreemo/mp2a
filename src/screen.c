@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <unistd.h>
 
 #include "screen.h"
@@ -27,6 +28,16 @@ enum mp2a_result_t display_frame() {
 
 	printf(MOVE_CURSOR(0, 0));
 
+	sws_scale(
+		video_sws_ctx,
+		(const uint8_t *const *) frame->data,
+		frame->linesize,
+		0,
+		video_codec_ctx->height,
+		rgb_frame->data,
+		rgb_frame->linesize
+	 );
+
 	int step_x = video_codec_params->width / window_size.ws_col;
 	int step_y = video_codec_params->height / window_size.ws_row;
 
@@ -34,10 +45,10 @@ enum mp2a_result_t display_frame() {
 		for (int x = 0; x < window_size.ws_col; x++) {
 			int video_x = x * step_x;
 			int video_y = y * step_y;
-			int index = video_y * frame->linesize[0] + video_x;
-			uint8_t r = frame->data[0][index];
-			uint8_t g = frame->data[0][index + 1];
-			uint8_t b = frame->data[0][index + 2];
+			int index = video_y * rgb_frame->linesize[0] + video_x * 3;
+			uint8_t r = rgb_frame->data[0][index];
+			uint8_t g = rgb_frame->data[0][index + 1];
+			uint8_t b = rgb_frame->data[0][index + 2];
 
 			float average = (r + g + b) / 3.0;
 			float intensity = average / 255.0;

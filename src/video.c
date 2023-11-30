@@ -11,6 +11,9 @@ AVCodecParameters *video_codec_params;
 AVCodecContext *video_codec_ctx;
 AVCodec *video_codec;
 
+struct SwsContext *video_sws_ctx;
+AVFrame *rgb_frame;
+
 
 enum mp2a_result_t find_video_stream() {
 	FAIL_IF_TRUE(
@@ -47,6 +50,7 @@ enum mp2a_result_t decode_video_packet() {
 		avcodec_send_packet(video_codec_ctx, packet) < 0,
 		"error: could not send packet to video codec\n"
 	);
+
 
 	while (true) {
 		int result = avcodec_receive_frame(video_codec_ctx, frame);

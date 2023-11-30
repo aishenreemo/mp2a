@@ -1,3 +1,4 @@
+-lswscale
 -lswresample
 -lavformat
 -lavcodec

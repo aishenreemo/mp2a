@@ -1,6 +1,7 @@
 #include "screen.h"
 #include "audio.h"
 #include "video.h"
+#include <libswscale/swscale.h>
 #include "main.h"
 
 
@@ -80,6 +81,7 @@ int main(int argc, char *args[]) {
 		"error: file %s doesn't contain a video stream.\n",
 		options.input_file
 	);
+
 	GOTO_IF_TRUE(
 		dealloc_l,
 		avcodec_parameters_to_context(video_codec_ctx, video_codec_params) < 0,
@@ -128,6 +130,13 @@ int main(int argc, char *args[]) {
 	GOTO_IF_ALLOC_NULL(dealloc_l, packet, av_packet_alloc());
 	GOTO_IF_ALLOC_NULL(dealloc_l, audio_swr_ctx, swr_alloc());
 
+	GOTO_IF_ALLOC_NULL(dealloc_l, rgb_frame, av_frame_alloc());
+	GOTO_IF_ALLOC_NULL(dealloc_l, video_sws_ctx, sws_getContext(
+		    video_codec_ctx->width, video_codec_ctx->height, video_codec_ctx->pix_fmt,
+		    video_codec_ctx->width, video_codec_ctx->height, AV_PIX_FMT_RGB24,
+		    SWS_BILINEAR, NULL, NULL, NULL
+	));
+
 	av_opt_set_int(audio_swr_ctx, "in_channel_layout", AV_CH_LAYOUT_STEREO, 0);
 	av_opt_set_int(audio_swr_ctx, "in_sample_rate", audio_codec_ctx->sample_rate, 0);
 	av_opt_set_sample_fmt(audio_swr_ctx, "in_sample_fmt", audio_codec_ctx->sample_fmt, 0);
@@ -137,10 +146,19 @@ int main(int argc, char *args[]) {
 	av_opt_set_sample_fmt(audio_swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
 	swr_init(audio_swr_ctx);
 
+	rgb_frame->format = AV_PIX_FMT_RGB24;
+	rgb_frame->width = video_codec_ctx->width;
+	rgb_frame->height = video_codec_ctx->height;
+	GOTO_IF_TRUE(
+		dealloc_l,
+		av_frame_get_buffer(rgb_frame, 32) < 0,
+		"error: could not allocate buffer for rgb frame\n"
+	);
 
 	float time_base = av_q2d(format_ctx->streams[video_stream_index]->time_base);
 	int64_t video_pts = AV_NOPTS_VALUE;
 
+	fprintf(stderr, "Pixel Format: %d\n", video_codec_ctx->pix_fmt);
 	while (av_read_frame(format_ctx, packet) >= 0) {
 		while (SDL_PollEvent(&event) != 0) {
 			if (event.type == SDL_QUIT) {
@@ -154,6 +172,7 @@ int main(int argc, char *args[]) {
 				decode_video_packet(),
 				"error: failed to decode video.\n"
 			);
+
 			video_pts = packet->pts;
 		} else if (packet->stream_index == audio_stream_index) {
 			GOTO_IF_FAILURE(
@@ -176,6 +195,7 @@ int main(int argc, char *args[]) {
 	}
 
 	dealloc_l: {
+		sws_freeContext(video_sws_ctx);
 		swr_free(&audio_swr_ctx);
 		av_frame_free(&frame);
 		av_packet_free(&packet);
