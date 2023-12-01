@@ -157,7 +157,6 @@ int main(int argc, char *args[]) {
 	float time_base = av_q2d(format_ctx->streams[video_stream_index]->time_base);
 	int64_t video_pts = AV_NOPTS_VALUE;
 
-	fprintf(stderr, "Pixel Format: %d\n", video_codec_ctx->pix_fmt);
 	while (av_read_frame(format_ctx, packet) >= 0) {
 		while (SDL_PollEvent(&event) != 0) {
 			if (event.type == SDL_QUIT) {
