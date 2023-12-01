@@ -3,6 +3,7 @@
 
 
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 
 #define CLEAR_TERMINAL "\033[2J"

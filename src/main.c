@@ -1,7 +1,6 @@
 #include "screen.h"
 #include "audio.h"
 #include "video.h"
-#include <libswscale/swscale.h>
 #include "main.h"
 
 

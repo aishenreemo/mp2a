@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include "screen.h"
 #include "video.h"
 #include "main.h"
