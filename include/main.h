@@ -53,6 +53,7 @@ struct mp2a_options_t {
 	char *input_file;
 	bool is_invert;
 	bool is_color;
+	bool is_full_color;
 };
 
 

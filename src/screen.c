@@ -64,7 +64,10 @@ enum mp2a_result_t display_frame() {
 			color[1] == color[4] &&
 			color[2] == color[5];
 
-		if (options.is_color && !same_color) {
+		if (options.is_full_color && !same_color) {
+			printf(SET_BG_COLOR(color[0], color[1], color[2]));
+			printf(SET_COLOR(color[0], color[1], color[2]));
+		} else if (options.is_color && !same_color) {
 			printf(SET_COLOR(color[0], color[1], color[2]));
 		}
 

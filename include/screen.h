@@ -11,6 +11,7 @@
 #define SHOW_CURSOR "\e[?25h"
 #define HIDE_CURSOR "\e[?25l"
 
+#define SET_BG_COLOR(R, G, B) "\033[48;2;%d;%d;%dm", R, G, B
 #define SET_COLOR(R, G, B) "\033[38;2;%d;%d;%dm", R, G, B
 #define RESET_COLOR "\033[0m"
 
