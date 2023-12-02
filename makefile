@@ -16,10 +16,10 @@ $(DIST):
 	mkdir -p $@
 
 $(DIST)/%.o: $(SOURCE)/%.c $(INCLUDE)/%.h
-	$(CC) -c -o $@ $< $(FLAGS) $(LIBS)
+	$(CC) -g -c -o $@ $< $(FLAGS) $(LIBS)
 
 $(TARGET): $(OBJECTS)
-	$(CC) -o $@ $^ $(FLAGS) $(LIBS)
+	$(CC) -g -o $@ $^ $(FLAGS) $(LIBS)
 
 install:
 	cp $(TARGET) ~/.local/bin

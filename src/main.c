@@ -132,9 +132,16 @@ int main(int argc, char *args[]) {
 
 	GOTO_IF_ALLOC_NULL(dealloc_l, rgb_frame, av_frame_alloc());
 	GOTO_IF_ALLOC_NULL(dealloc_l, video_sws_ctx, sws_getContext(
-		    video_codec_ctx->width, video_codec_ctx->height, video_codec_ctx->pix_fmt,
-		    video_codec_ctx->width, video_codec_ctx->height, AV_PIX_FMT_RGB24,
-		    SWS_BILINEAR, NULL, NULL, NULL
+		video_codec_ctx->width,
+		video_codec_ctx->height,
+		video_codec_ctx->pix_fmt,
+		video_codec_ctx->width,
+		video_codec_ctx->height,
+		AV_PIX_FMT_RGB24,
+		SWS_BILINEAR,
+		NULL,
+		NULL,
+		NULL
 	));
 
 	av_opt_set_int(audio_swr_ctx, "in_channel_layout", AV_CH_LAYOUT_STEREO, 0);
