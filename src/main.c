@@ -124,6 +124,7 @@ int main(int argc, char *args[]) {
 
 	printf(CLEAR_TERMINAL);
 	printf(MOVE_CURSOR(0, 0));
+	printf(HIDE_CURSOR);
 
 	GOTO_IF_ALLOC_NULL(dealloc_l, frame, av_frame_alloc());
 	GOTO_IF_ALLOC_NULL(dealloc_l, packet, av_packet_alloc());
@@ -189,10 +190,11 @@ int main(int argc, char *args[]) {
 			SDL_Delay(diff);
 		}
 
-		GOTO_IF_TRUE(dealloc_l, quit, "exiting...\n");
+		GOTO_IF_TRUE(dealloc_l, quit, RESET_COLOR "exiting...\n");
 	}
 
 	dealloc_l: {
+		printf(SHOW_CURSOR);
 		sws_freeContext(video_sws_ctx);
 		swr_free(&audio_swr_ctx);
 		av_frame_free(&frame);

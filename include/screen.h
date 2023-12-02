@@ -8,6 +8,8 @@
 
 #define CLEAR_TERMINAL "\033[2J"
 #define MOVE_CURSOR(X, Y) "\033[%d;%dH", X, Y
+#define SHOW_CURSOR "\e[?25h"
+#define HIDE_CURSOR "\e[?25l"
 
 #define SET_COLOR(R, G, B) "\033[38;2;%d;%d;%dm", R, G, B
 #define RESET_COLOR "\033[0m"
