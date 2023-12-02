@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 
 #include "screen.h"
@@ -59,6 +60,12 @@ enum mp2a_result_t display_frame() {
 
 		float average = (color[0] + color[1] + color[2]) / 3.0;
 		float intensity = average / 255.0;
+
+		if (options.is_invert) {
+			color[0] = UINT8_MAX - color[0];
+			color[1] = UINT8_MAX - color[1];
+			color[2] = UINT8_MAX - color[2];
+		}
 
 		bool same_color = color[0] == color[3] &&
 			color[1] == color[4] &&
